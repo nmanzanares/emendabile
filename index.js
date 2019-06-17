@@ -121,12 +121,12 @@ function startCamera(){
 }
 
 function changeCam(){
-	if(deviceIds.length > 1){
+	if(deviceIds.length > 1 && streaming){
 		changeCamera.removeAttribute('hidden');
 	}else{
 		changeCamera.setAttribute('hidden','');
 	}
-	if(change_camera> deviceIds.length){
+	if(change_camera> deviceIds.length-1){
 		change_camera=0;
 	}
 }
