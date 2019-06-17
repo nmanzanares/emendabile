@@ -1,0 +1,86 @@
+head{
+	vertical-align: middle;
+    margin-left: 0px;
+}
+
+body{
+  	 height: 950px;
+  	 background-position: center;
+  	 background-repeat: no-repeat;
+     background-size: cover;
+     background-attachment: fixed;	
+	 /*background-color: rgba(0,0,0, 0.7); */
+}
+
+#table_body{
+  	background-color: rgba(255, 172, 126, 0.7); 
+  	color: black;
+ 	font-weight: bold;
+	border: 3px solid;
+	overflow: auto;
+ 	position: absolute;
+ 	top: 55%%;
+  	left: 50%;
+  	transform: translate(-50%, 0%);
+  	width: 85%;
+  	padding: 20px;	
+}
+
+#tabla1{
+	width:100%;
+	padding-top:0.5%;
+	padding-bottom:0.5%;
+	border-style: solid;
+	border-color: black;
+	color: white;
+	font-family: "Comic-Sans", "Times New Roman", Times, serif;
+	font-style: normal;
+	background-color: rgb(255, 87, 51);
+	/*rgba(102,205,170, 0.8);*/
+	margin-bottom: 2%;
+	margin-left:auto;
+	margin-right:auto;
+}
+.caption{
+	position: relative;
+	max-width: 100%;
+	max-height: 70%;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+#finish_button{
+	margin:auto;
+}
+
+.error{
+	color: red;
+	
+}
+
+#nuevo_mod{
+	align-content: space-between;
+	top: 50%;
+}
+
+.titulo{
+	font-size:4em;
+}
+
+.titulillo{
+	font-family: arial;
+	text-align: left;
+	margin-left: 5%;
+}
+
+.boton{
+	border-style: solid;
+	border-color: black;
+	border-radius:6px;
+	font-variant: small-caps;
+	font-size: 200;
+	height: 23px;
+	width: 150px;
+	transform: translate(214.5%, 0%);
+	transform: translate(16%, 0%);
+}

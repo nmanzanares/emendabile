@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Emendábile. Corrector de exámenes online.</title>
+	<link rel="stylesheet" href="estilo.css" type="text/css">
+	<table id="tabla1">
+		<thead>
+			<tr>
+				<!--<th><img src="emendabile" alt="Logotipo Emendábile" class="logo"></th>-->
+				<th><span class="titulo"> Emendábile</span><br> <h2 class="subtitulo"> Corrector de exámenes online</h2></th>
+		</thead>
+	</table>
+</head>
+<body>
+<!--<p id="status">OpenCV.js is loading...</p>-->
+
+<table id="table_body">
+	<thead>
+		<tr>
+			<th><button id="startAndStop" hidden> Iniciar corrección </button></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr align = "center" id = "intro">
+			<td>
+				<span class="titulillo"> ¡Bienvenido a Emendábile! </span>
+				<p></p>
+				La página en la que puedes corregir tus exámenes en un instante.
+				<p></p>
+				Para comenzar, por favor introduzca los datos del examen que quiere corregir
+				<p></p>
+				<button id="nuevo_mod"> Introducir modelo de examen </button>
+			</td>
+		</tr>
+		<tr align = "center" id="tabla_form" >
+			<td>
+	   			 <div id="form1" hidden>
+					<p></p>
+					<span class="titulillo"> Creación de nuevo modelo de examen </span>
+					<p></p>
+		   		 	<label for="num_q">Número de preguntas: </label>
+		    		<input id="num_q" name="num_q" type="number" placeholder="8, 10, ..." value="">
+					<p></p>
+		    		<label for="num_a">Respuestas por cada pregunta: </label>
+		    		<input id="num_a" name="num_a" type="number" placeholder="3, 4, ..." value="">
+					<p></p>
+		    		<label for="plus">Puntuación de respuesta correcta: </label>
+		    		<input id="plus" name="plus" type="number" step="0.5" placeholder="1, 1.5, ..." value="">
+					<p></p>
+		    		<label for="inc">Puntuación de respuesta incorrecta: </label>
+		    		<input id="inc" name="inc" type="number" step="0.1" placeholder="-0.3, -0.25, ..." value="">
+					<p></p>
+		    		<label for="empty">Puntuación de respuesta vacía: </label>
+		    		<input id="empty" name="empty" step="0.1" placeholder="0, 0.1, ..." type="number" value="">
+					<p></p>
+					<label for="types">Número de tipos de examen: </label>
+		    		<input id="types" name="types" step="1" placeholder="1, 2, ..." type="number" value="">
+					<p></p>
+		    		<button id="form1_but"> Siguiente </button>
+					<p id="error_message" class="error" hidden>
+		    		Por favor, rellene todos los campos correctamente.
+					</p>
+	   			 </div>
+	   			 <div id="form2" hidden>
+					<p></p>
+					Respuestas del examen: 
+					<p id="error_message2" class="error" hidden>
+		    		Por favor, rellene todos los campos correctamente.
+					</p>
+	   			 </div>
+				 <p><button id="form2_but" hidden> Iniciar corrección </button></p>
+			</td>
+		</tr>
+		<tr align = "center">
+		  <td class="inputoutput">
+			<div class="caption">
+				<video id="video"> Video </video>
+				<!--<button id="debugMode" disabled> Debug Mode </button>-->
+			</div>
+			<div class="caption">
+				<canvas id="canvasOutput" hidden></canvas>
+				<!--<button id="debugMode" disabled> Debug Mode </button>-->
+			</div>
+			<!--<img id="imageSrc" alt="No Image" />
+			<div class="caption">imageSrc <input type="file" id="fileInput" name="file" disabled/></div>-->
+		  </td>
+		</tr>
+		<tr align = "center" id="puntuaciones">
+			<p id="punt"> </p>
+		</tr>
+		<tr align = "center" id="final_div">
+			<td> <button id="finish_button" hidden> Finalizar corrección </button> </td>
+		</tr>
+	</tbody>
+</table>
+	
+	<!--<tr>
+		<td class="inputoutput">
+			<canvas id="canvasOutput" ></canvas>
+			<div class="caption">Line and corner detection</div>
+	  	</td>
+	</tr>
+	<tr>
+		<td class="inputoutput">
+			<canvas id="canvasOutput2" ></canvas>
+			<div class="caption">Response assignation</div>
+	  	</td>-->
+		
+
+<script src="geometry.js"></script>
+<script async src="opencv.js" type="text/javascript"></script>
+<script src="index.js"></script>
+<script type="text/javascript">
+
+let model;
+
+nuevo_mod.addEventListener('click', function(){
+	dataForm1();
+	intro.setAttribute('hidden','');
+	form1.removeAttribute('hidden');
+});
+
+function dataForm1(){
+ 	numq = parseInt(document.getElementById("num_q").value,10);
+ 	numa = parseInt(document.getElementById("num_a").value,10);
+ 	plus = parseFloat(document.getElementById("plus").value);
+ 	deduct = parseFloat(document.getElementById("inc").value);
+ 	emptiness = parseFloat(document.getElementById("empty").value);
+ 	dims = [[numa,Math.round(numq/2)],[numa,Math.trunc(numq/2)]];
+	types = parseInt(document.getElementById("types").value,10);
+	if(dims != null && plus > 0 && deduct < 0 && emptiness !=null && types>0){
+		return {sols:new Array(), dims:dims, types: types, plus:plus, deduct:deduct, emptiness:emptiness};
+	}else{
+		return -1;
+	}
+}
+
+function dataForm2(){
+	let sols = new Array();
+	let error=false;
+	for(let i=0; i<model.types; i++){
+		let sols_type = new Array();
+		for(let j=0; j<(model.dims[0][1] + model.dims[1][1]); j++){
+			let sols_q = new Array();
+			let check=false;
+			for(let k=0; k<model.dims[0][0]; k++){
+				if(document.getElementById('sol'+i+j+k+'').checked){
+					sols_q.push(1);
+					check=true;
+				}else{
+					sols_q.push(0);
+				}
+			}
+			if(!check) error=true;
+			sols_type.push(sols_q);
+		}
+		sols.push(sols_type);
+	}
+	if(!error){
+		return sols;
+	}else{
+		return -1;
+	}
+}
+
+form1_but.addEventListener('click', function(){
+	model = dataForm1();
+	if(model!=-1){
+		setform2();
+		form1.setAttribute('hidden','');
+		form2.removeAttribute('hidden');
+	}else{
+		error_message.removeAttribute('hidden');
+	}
+});
+
+form2_but.addEventListener('click', () => {
+	let sols = dataForm2();
+	if(sols!=-1){
+		form2.setAttribute('hidden','');
+		form2_but.setAttribute('hidden','');
+		model.sols = sols;
+		num_exam++;
+		startCamera();
+	}else{
+		error_message2.removeAttribute('hidden');
+	}
+});
+
+function setform2(){
+	let letras = ['A','B','C','D','E'];
+	for(let i=0; i<model.types; i++){
+		form2.insertAdjacentHTML('beforeend', "<p></p>Tipo de examen " + (i+1) + "<p></p>");
+		for(let j=0; j<(model.dims[0][1] + model.dims[1][1]); j++){
+			form2.insertAdjacentHTML('beforeend', '<p></p>'+ (j+1)+':  ');
+			for(let k=0; k<model.dims[0][0]; k++){
+				form2.insertAdjacentHTML('beforeend', '<input id="sol'+i+j+k+'" name="q'+i+j+'" type="radio" value="'+k+'">' + letras[k]+'');
+			}
+			form2.insertAdjacentHTML('beforeend', '<p></p>');
+		}
+	}
+	form2_but.removeAttribute('hidden');
+}
+
+
+
+let src;
+let exams = new Array();
+let num_exam=0;
+let debug_mode;
+
+
+
+
+/* imgElement = document.getElementById('imageSrc');
+let inputElement = document.getElementById('fileInput');
+inputElement.addEventListener('change', (e) => {
+  imgElement.src = URL.createObjectURL(e.target.files[0]);
+}, false);
+
+imgElement.onload = function() {
+  src = cv.imread(imgElement);
+  process(src);
+};
+*/
+
+
+
+startAndStop.addEventListener('click', () => {
+    if (!streaming) {
+    	num_exam++;
+    	if(num_exam!=1){
+			exam = {image:src, note:puntation}
+			exams.push(exam);
+		}
+        startCamera();
+    } else {
+        stopCamera();
+    }
+});
+
+/*
+debugMode.addEventListener('click', () => {
+    if (!streaming) {
+    	return confirm('La cámara no está grabando');
+    } else {
+    		if(debug_mode){
+      	  debug_mode = false;
+       	  debugMode.innerText = 'Debug Mode';
+    		}else{
+      	  debug_mode = true;
+       	  debugMode.innerText = 'Stop Debug Mode';
+    		}
+    }
+});
+*/
+
+canvasOutput.addEventListener('click', () => {
+	let coorX = event.offsetX;
+	let coorY = event.offsetY;
+	check_click(src,coorX,coorY);
+});
+
+
+
+finish_button.addEventListener('click', () => {
+	exam = {image:src, note:puntation}
+	exams.push(src);
+	stopCamera();
+	src.delete();
+});
+
+function onOpenCvReady() {
+  //document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+  //startAndStop.removeAttribute('disabled');
+  //debugMode.removeAttribute('disabled');
+  //fileInput.removeAttribute('disabled');
+}
+function print_lines(axes) {
+	document.getElementById('lines_printed').innerHTML = 'Líneas';
+	var para = document.createElement("p");
+	var head = document.createTextNode("Lineas en tipo array");
+	for(let i = 0; i < axes.length; ++i){
+		for(let j = 0; j < axes[i].lines.length; j++) {
+			var node = document.createTextNode("[" + axes[i].lines[j][0] + "," + axes[i].lines[j][1] + "] ");
+			para.appendChild(head);
+			para.appendChild(node);
+		}
+	}
+	var parElement = document.getElementById("lines_printed");
+	parElement.appendChild(para);
+}
+
+function print_corners(corners) {
+	document.getElementById('decisions').innerHTML = 'Líneas';
+	var para = document.createElement("p");
+	var head = document.createTextNode("Corners en formato punto");
+	for(let i = 0; i < corners.length; ++i){
+		for(let j = 0; j < corners[i].length; j++) {
+			for(let k = 0; k < corners[i][j].length; k++){
+				var node = document.createTextNode("[" + corners[i][j][k].x + "," + corners[i][j][k].y + "] ");
+				para.appendChild(head);
+				para.appendChild(node);
+			}
+		}
+	}
+	var parElement = document.getElementById("lines_printed");
+	parElement.appendChild(para);
+}
+
+function print_decisions(decisions){
+	let letras = new Array('empty','a','b','c','d');
+	document.getElementById('decisions').innerHTML = 'Decisiones';
+	var para = document.createElement("p");
+	var head = document.createTextNode("Decisiones");
+	for(let i = 0; i < decisions.length; ++i){
+		let sol = 0;
+		for(let j = 0; j < decisions[i].length; j++) {
+			if(decisions[i][j]==1){
+				sol = j+1;
+			}
+		}
+		var node = document.createTextNode("A la pregunta "+(i+1)+" se responde "+letras[sol]+"\n");
+		para.appendChild(head);
+		para.appendChild(node);
+	}
+	var parElement = document.getElementById("decisions");
+	parElement.appendChild(para);
+}
+
+function print_puntation(puntation){
+	var text = "<p></p>La puntuacion total es de " + puntation.note + ". Con un total de " + puntation.correct + " aciertos, " + puntation.incorrect + " incorrectos, y " + puntation.empty + " vacíos.";
+	document.getElementById('puntuaciones').innerHTML = text;
+
+}
+
+</script>
+</body>
+</html>
+
