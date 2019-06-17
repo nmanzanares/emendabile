@@ -19,6 +19,7 @@
 	<thead>
 		<tr>
 			<th><button id="startAndStop" hidden> Iniciar corrección </button></th>
+			<th><button id="changeCamera" hidden> Cambiar cámara </button></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -114,6 +115,7 @@
 <script type="text/javascript">
 
 let model;
+let change_camera=0;
 
 nuevo_mod.addEventListener('click', function(){
 	dataForm1();
@@ -238,6 +240,12 @@ startAndStop.addEventListener('click', () => {
     } else {
         stopCamera();
     }
+});
+
+changeCamera.addEventListener('click', () => {
+    	change_camera++;
+		stopCamera();
+		startCamera();
 });
 
 /*

@@ -30,6 +30,7 @@ param_cross_mask_thickness = 0.2;
 param_cross_mask_threshold = 0.08;
 
 function process(src){
+  changeCam();
   let pre = pre_process(src);
   console.log("param: " + param_hough_thresholds[param_conter]);
   let lines_ob_mat = detect_lines(pre, param_conter);
@@ -93,6 +94,7 @@ let video = document.getElementById("video");
 let stream = null;
 let vc = null;
 let streaming = false;
+let deviceIds;
 const FPS = 50;
 
 function startCamera(){
@@ -102,8 +104,10 @@ function startCamera(){
 	canvasOutput.setAttribute('hidden','');
 	video.removeAttribute('hidden');
 	
+	deviceIds = findIdVideo();
+	
 	if(streaming) return;
-	navigator.mediaDevices.getUserMedia({video: resolution, audio: false})
+	navigator.mediaDevices.getUserMedia({video: { deviceId: { exact: deviceIds[change_camera] } }, audio: false})
     .then(function(s) {
     stream = s;
     video.srcObject = s;
@@ -114,6 +118,31 @@ function startCamera(){
   });
 
   video.addEventListener("canplay", onVideoCanPlay, false);
+}
+
+function changeCam(){
+	if(deviceIds.length > 1){
+		changeCamera.removeAttribute('hidden');
+	}else{
+		changeCamera.setAttribute('hidden','');
+	}
+	if(changeCamera > deviceIds.length){
+		changeCamera=0;
+	}
+}
+
+function findIdVideo(){
+	let ids = new Array();
+	navigator.mediaDevices.enumerateDevices()
+	.then(function(devices) {
+		devices.forEach(function(device) {
+			if(device.kind == "videoinput"){ ids.push(device.deviceId);}
+		});
+	});
+	/*.catch(function(err) {
+		console.log(err.name + ": " + err.message);
+	});*/
+	return ids;
 }
 
 function startVideoProcessing(){
