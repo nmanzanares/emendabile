@@ -126,8 +126,8 @@ function changeCam(){
 	}else{
 		changeCamera.setAttribute('hidden','');
 	}
-	if(changeCamera > deviceIds.length){
-		changeCamera=0;
+	if(change_camera> deviceIds.length){
+		change_camera=0;
 	}
 }
 
