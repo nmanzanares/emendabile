@@ -152,7 +152,7 @@ function changeCam(){
 		changeCamera.setAttribute('hidden','');
 	}
 	if(currentCamera> cameras.length-1){
-		change_camera=0;
+		currentCamera=0;
 	}
 }
 
