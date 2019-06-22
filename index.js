@@ -90,29 +90,54 @@ function process(src){
   return true;
 }
 
+function findIdVideo(){
+    return new Promise(function(resolve, reject) {
+	navigator.mediaDevices.enumerateDevices()
+	    .then(function(devices) {
+                var ids = new Array();
+		devices.forEach(function(device) {
+		    if(device.kind === "videoinput"){
+                        ids.push(device.deviceId);
+                    }
+		});
+                resolve(ids);
+	});
+    });
+}
+
 let video = document.getElementById("video");
 let stream = null;
 let vc = null;
 let streaming = false;
 let deviceIds;
 const FPS = 50;
+let cameras = new Array();
+let currentCamera;
+
+findIdVideo().then(function(cams) {
+    cameras = cams;
+    currentCamera = 0;
+});
 
 function startCamera(){
-	startAndStop.removeAttribute('hidden');
-	finish_button.removeAttribute('hidden');
-	startAndStop.innerText = 'Stop Video';
-	canvasOutput.setAttribute('hidden','');
-	video.removeAttribute('hidden');
-	
-	deviceIds = findIdVideo();
-	
-	if(streaming) return;
-	navigator.mediaDevices.getUserMedia({video: { deviceId: { exact: deviceIds[change_camera] } }, audio: false})
-    .then(function(s) {
-    stream = s;
-    video.srcObject = s;
-    video.play();
-  })
+    startAndStop.removeAttribute('hidden');
+    finish_button.removeAttribute('hidden');
+    startAndStop.innerText = 'Stop Video';
+    canvasOutput.setAttribute('hidden','');
+    video.removeAttribute('hidden');
+    if(streaming) return;
+    navigator.mediaDevices.getUserMedia(
+        {video: {
+            deviceId: {
+                exact: cameras[currentCamera]
+            }
+        },
+         audio: false})
+        .then(function(s) {
+            stream = s;
+            video.srcObject = s;
+            video.play();
+        })
     .catch(function(err) {
     console.log("An error occured! " + err);
   });
@@ -121,29 +146,16 @@ function startCamera(){
 }
 
 function changeCam(){
-	if(deviceIds.length > 1 && streaming){
+	if(cameras.length > 1 && streaming){
 		changeCamera.removeAttribute('hidden');
 	}else{
 		changeCamera.setAttribute('hidden','');
 	}
-	if(change_camera> deviceIds.length-1){
+	if(currentCamera> cameras.length-1){
 		change_camera=0;
 	}
 }
 
-function findIdVideo(){
-	let ids = new Array();
-	navigator.mediaDevices.enumerateDevices()
-	.then(function(devices) {
-		devices.forEach(function(device) {
-			if(device.kind == "videoinput"){ ids.push(device.deviceId);}
-		});
-	});
-	/*.catch(function(err) {
-		console.log(err.name + ": " + err.message);
-	});*/
-	return ids;
-}
 
 function startVideoProcessing(){
 	if (!streaming) { console.warn("Please startup your webcam"); return; }
