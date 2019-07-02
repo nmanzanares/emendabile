@@ -520,17 +520,24 @@ function is_cross(pre, mask, masked, plu, pru, pld, prd){
 function decide_cells(corner_matrixes, pre){
 	answer_cells = answer_cells_geometry(corner_matrixes);
 	let decisions = new Array();
+	let row_marked = false;
 	let mask = new cv.Mat(pre.size().height, pre.size().width, pre.type());
 	let masked = new cv.Mat(pre.size().height, pre.size().width, pre.type());
 	
 	for(let i = 0; i < answer_cells.length; ++i){
 		let row_decisions= new Array();
 		for(let j = 0; j < answer_cells[i].length; j++) {
-			let cell = answer_cells[i][j];
-			let decision = is_cross(pre, mask, masked, cell.plu, cell.pru, cell.pld, cell.prd);
-			row_decisions.push(decision);		
+			if(row_marked){
+				row_decisions.push(0);	
+			}else{
+				let cell = answer_cells[i][j];
+				let decision = is_cross(pre, mask, masked, cell.plu, cell.pru, cell.pld, cell.prd);
+				row_decisions.push(decision);	
+				if(decision==1) row_marked=true;
+			}
 		}
 		decisions.push(row_decisions);
+		row_marked=false;
 	}
 	return decisions;
 }
